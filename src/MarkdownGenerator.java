@@ -23,10 +23,11 @@ public class MarkdownGenerator {
         List<PropiedadDoc> propiedades = extraerPropiedades(clase, lineasFuente, rutaFuente);
         List<MetodoDoc> metodos = extraerMetodos(clase, lineasFuente, rutaFuente);
 
-        md.append("File\n");
+        md.append("### File\n");
         md.append(rutaFuente).append("\n\n");
 
-        md.append("Class\n");
+        md.append("### Class\n");
+        md.append("\n");
         md.append("| Field | Value |\n");
         md.append("| --- | --- |\n");
         md.append("| Name | ").append(escapeMarkdownCell(valorClase(infoClase, clase.getSimpleName(), CampoClase.NOMBRE))).append(" |\n");
@@ -35,24 +36,30 @@ public class MarkdownGenerator {
         md.append("| Version | ").append(escapeMarkdownCell(valorClase(infoClase, "No definida", CampoClase.VERSION))).append(" |\n");
         md.append("| Is subclass | ").append(esSubclase(clase)).append(" |\n\n");
 
-        md.append("Index\n");
-        md.append("Properties\n");
+        md.append("---\n");
+
+        md.append("### Index\n");
+        md.append("\n");
+        md.append("### Properties\n");
+        md.append("\n");
         md.append("| Name |\n");
         md.append("| --- |\n");
         for (PropiedadDoc propiedad : propiedades) {
             md.append("| ").append(escapeMarkdownCell(propiedad.nombre)).append(" |\n");
         }
-        md.append("\n");
+        md.append("---\n");
 
-        md.append("Methods\n");
+        md.append("### Methods\n");
+        md.append("\n");
         md.append("| Name |\n");
         md.append("| --- |\n");
         for (MetodoDoc metodo : metodos) {
             md.append("| ").append(escapeMarkdownCell(metodo.nombre)).append(" |\n");
         }
-        md.append("\n");
+        md.append("---\n");
 
-        md.append("Properties\n");
+        md.append("### Properties\n");
+        md.append("\n");
         md.append("| Name | Type | Description | Modifiers | Defined in |\n");
         md.append("| --- | --- | --- | --- | --- |\n");
         for (PropiedadDoc propiedad : propiedades) {
@@ -68,9 +75,9 @@ public class MarkdownGenerator {
               .append(escapeMarkdownCell(propiedad.definicion))
               .append(" |\n");
         }
+        md.append("---\n");
+        md.append("### Methods\n");
         md.append("\n");
-
-        md.append("Methods\n");
         md.append("| Name | Parameters | Returns | Description | Modifiers | Getter | Setter | Constructor | Overridden | Defined in |\n");
         md.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
         for (MetodoDoc metodo : metodos) {
@@ -96,10 +103,12 @@ public class MarkdownGenerator {
               .append(escapeMarkdownCell(metodo.definicion))
               .append(" |\n");
         }
-        md.append("\n");
+        md.append("---\n");
 
-        md.append("Property Details\n");
+        md.append("### Property Details\n");
         for (PropiedadDoc propiedad : propiedades) {
+            md.append("\n");
+            md.append("---\n");
             md.append("### ").append(escapeMarkdownCell(propiedad.nombre)).append("\n");
             md.append("| Field | Value |\n");
             md.append("| --- | --- |\n");
@@ -111,8 +120,12 @@ public class MarkdownGenerator {
             md.append("| Defined in | ").append(escapeMarkdownCell(propiedad.definicion)).append(" |\n\n");
         }
 
-        md.append("Method Details\n");
+        md.append("---\n");
+
+        md.append("### Method Details\n");
         for (MetodoDoc metodo : metodos) {
+            md.append("\n");
+            md.append("---\n");
             md.append("### ").append(escapeMarkdownCell(metodo.nombre)).append("\n");
             md.append("| Field | Value |\n");
             md.append("| --- | --- |\n");

@@ -1,7 +1,8 @@
-File
+### File
 src/ClaseEjemplo.java
 
-Class
+### Class
+
 | Field | Value |
 | --- | --- |
 | Name | ClaseEjemplo |
@@ -10,14 +11,18 @@ Class
 | Version | 1.0 |
 | Is subclass | false |
 
-Index
-Properties
+---
+### Index
+
+### Properties
+
 | Name |
 | --- |
 | edad |
 | nombre |
+---
+### Methods
 
-Methods
 | Name |
 | --- |
 | ClaseEjemplo |
@@ -25,14 +30,16 @@ Methods
 | getNombre |
 | setEdad |
 | setNombre |
+---
+### Properties
 
-Properties
 | Name | Type | Description | Modifiers | Defined in |
 | --- | --- | --- | --- | --- |
 | edad | int | Edad del usuario | private | src/ClaseEjemplo.java:12 |
 | nombre | String | Nombre del usuario | private | src/ClaseEjemplo.java:9 |
+---
+### Methods
 
-Methods
 | Name | Parameters | Returns | Description | Modifiers | Getter | Setter | Constructor | Overridden | Defined in |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ClaseEjemplo | String arg0, int arg1 | void | Constructor de la clase. | public | false | false | true | false | src/ClaseEjemplo.java:15 |
@@ -40,8 +47,10 @@ Methods
 | getNombre | - | String | Obtiene el nombre. | public | true | false | false | false | src/ClaseEjemplo.java:21 |
 | setEdad | int arg0 | void | Establece la edad. | public | false | true | false | false | src/ClaseEjemplo.java:36 |
 | setNombre | String arg0 | void | Establece el nombre. | public | false | true | false | false | src/ClaseEjemplo.java:26 |
+---
+### Property Details
 
-Property Details
+---
 ### edad
 | Field | Value |
 | --- | --- |
@@ -52,6 +61,8 @@ Property Details
 | Decorators | @InfoAtributo(descripcion="Edad del usuario") |
 | Defined in | src/ClaseEjemplo.java:12 |
 
+
+---
 ### nombre
 | Field | Value |
 | --- | --- |
@@ -62,7 +73,10 @@ Property Details
 | Decorators | @InfoAtributo(descripcion="Nombre del usuario") |
 | Defined in | src/ClaseEjemplo.java:9 |
 
-Method Details
+---
+### Method Details
+
+---
 ### ClaseEjemplo
 | Field | Value |
 | --- | --- |
@@ -78,6 +92,8 @@ Method Details
 | Decorators | @InfoMetodo(descripcion="Constructor de la clase.") |
 | Defined in | src/ClaseEjemplo.java:15 |
 
+
+---
 ### getEdad
 | Field | Value |
 | --- | --- |
@@ -93,6 +109,8 @@ Method Details
 | Decorators | @InfoMetodo(descripcion="Obtiene la edad.") |
 | Defined in | src/ClaseEjemplo.java:31 |
 
+
+---
 ### getNombre
 | Field | Value |
 | --- | --- |
@@ -108,6 +126,8 @@ Method Details
 | Decorators | @InfoMetodo(descripcion="Obtiene el nombre.") |
 | Defined in | src/ClaseEjemplo.java:21 |
 
+
+---
 ### setEdad
 | Field | Value |
 | --- | --- |
@@ -123,6 +143,8 @@ Method Details
 | Decorators | @InfoMetodo(descripcion="Establece la edad.") |
 | Defined in | src/ClaseEjemplo.java:36 |
 
+
+---
 ### setNombre
 | Field | Value |
 | --- | --- |
