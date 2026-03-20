@@ -10,5 +10,4 @@ public @interface InfoClase {
 	String autor();
 	String descripcion();
 	String version();
-	boolean esSubclase() default false;
 }

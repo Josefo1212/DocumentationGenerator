@@ -2,8 +2,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,22 +20,20 @@ public class MarkdownGenerator {
         List<String> lineasFuente = leerLineasFuente(rutaFuente);
 
         InfoClase infoClase = clase.getAnnotation(InfoClase.class);
-        List<PropiedadDoc> propiedades = extraerPropiedades(clase, lineasFuente);
-        List<MetodoDoc> metodos = extraerMetodos(clase, lineasFuente);
+        List<PropiedadDoc> propiedades = extraerPropiedades(clase, lineasFuente, rutaFuente);
+        List<MetodoDoc> metodos = extraerMetodos(clase, lineasFuente, rutaFuente);
 
         md.append("File\n");
         md.append(rutaFuente).append("\n\n");
 
-        if (infoClase != null) {
-            md.append("Class\n");
-            md.append("| Field | Value |\n");
-            md.append("| --- | --- |\n");
-            md.append("| Name | ").append(escapeMarkdownCell(infoClase.nombre())).append(" |\n");
-            md.append("| Author | ").append(escapeMarkdownCell(infoClase.autor())).append(" |\n");
-            md.append("| Description | ").append(escapeMarkdownCell(infoClase.descripcion())).append(" |\n");
-            md.append("| Version | ").append(escapeMarkdownCell(infoClase.version())).append(" |\n");
-            md.append("| Is subclass | ").append(infoClase.esSubclase()).append(" |\n\n");
-        }
+        md.append("Class\n");
+        md.append("| Field | Value |\n");
+        md.append("| --- | --- |\n");
+        md.append("| Name | ").append(escapeMarkdownCell(valorClase(infoClase, clase.getSimpleName(), CampoClase.NOMBRE))).append(" |\n");
+        md.append("| Author | ").append(escapeMarkdownCell(valorClase(infoClase, "No definido", CampoClase.AUTOR))).append(" |\n");
+        md.append("| Description | ").append(escapeMarkdownCell(valorClase(infoClase, "No definida", CampoClase.DESCRIPCION))).append(" |\n");
+        md.append("| Version | ").append(escapeMarkdownCell(valorClase(infoClase, "No definida", CampoClase.VERSION))).append(" |\n");
+        md.append("| Is subclass | ").append(esSubclase(clase)).append(" |\n\n");
 
         md.append("Index\n");
         md.append("Properties\n");
@@ -52,13 +53,11 @@ public class MarkdownGenerator {
         md.append("\n");
 
         md.append("Properties\n");
-        md.append("| Name | Declaration | Type | Description | Modifiers | Decorators | Defined in |\n");
-        md.append("| --- | --- | --- | --- | --- | --- | --- |\n");
+        md.append("| Name | Type | Description | Modifiers | Defined in |\n");
+        md.append("| --- | --- | --- | --- | --- |\n");
         for (PropiedadDoc propiedad : propiedades) {
             md.append("| ")
               .append(escapeMarkdownCell(propiedad.nombre))
-              .append(" | ")
-              .append(escapeMarkdownCell(propiedad.nombre + ": " + propiedad.tipo))
               .append(" | ")
               .append(escapeMarkdownCell(propiedad.tipo))
               .append(" | ")
@@ -66,25 +65,19 @@ public class MarkdownGenerator {
               .append(" | ")
               .append(escapeMarkdownCell(propiedad.modificadores))
               .append(" | ")
-              .append(escapeMarkdownCell(toTableMultiline(propiedad.decoradores)))
-              .append(" | ")
-              .append(escapeMarkdownCell(rutaFuente + ":" + propiedad.lineaDefinicion))
+              .append(escapeMarkdownCell(propiedad.definicion))
               .append(" |\n");
         }
         md.append("\n");
 
         md.append("Methods\n");
-        md.append("| Name | Signature | Decorators | Defined in | Returns | Description | Modifiers | Getter | Setter | Constructor | Overridden |\n");
-        md.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        md.append("| Name | Parameters | Returns | Description | Modifiers | Getter | Setter | Constructor | Overridden | Defined in |\n");
+        md.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
         for (MetodoDoc metodo : metodos) {
             md.append("| ")
               .append(escapeMarkdownCell(metodo.nombre))
               .append(" | ")
-              .append(escapeMarkdownCell(metodo.nombre + "(" + metodo.parametros + ")"))
-              .append(" | ")
-              .append(escapeMarkdownCell(toTableMultiline(metodo.decoradores)))
-              .append(" | ")
-              .append(escapeMarkdownCell(rutaFuente + ":" + metodo.lineaDefinicion))
+              .append(escapeMarkdownCell(metodo.parametros))
               .append(" | ")
               .append(escapeMarkdownCell(metodo.retorno))
               .append(" | ")
@@ -99,7 +92,41 @@ public class MarkdownGenerator {
               .append(metodo.esConstructor)
               .append(" | ")
               .append(metodo.esSobreescrito)
+              .append(" | ")
+              .append(escapeMarkdownCell(metodo.definicion))
               .append(" |\n");
+        }
+        md.append("\n");
+
+        md.append("Property Details\n");
+        for (PropiedadDoc propiedad : propiedades) {
+            md.append("### ").append(escapeMarkdownCell(propiedad.nombre)).append("\n");
+            md.append("| Field | Value |\n");
+            md.append("| --- | --- |\n");
+            md.append("| Declaration | ").append(escapeMarkdownCell(propiedad.nombre + ": " + propiedad.tipo)).append(" |\n");
+            md.append("| Type | ").append(escapeMarkdownCell(propiedad.tipo)).append(" |\n");
+            md.append("| Description | ").append(escapeMarkdownCell(propiedad.descripcion)).append(" |\n");
+            md.append("| Modifiers | ").append(escapeMarkdownCell(propiedad.modificadores)).append(" |\n");
+            md.append("| Decorators | ").append(escapeMarkdownCell(propiedad.decoradores)).append(" |\n");
+            md.append("| Defined in | ").append(escapeMarkdownCell(propiedad.definicion)).append(" |\n\n");
+        }
+
+        md.append("Method Details\n");
+        for (MetodoDoc metodo : metodos) {
+            md.append("### ").append(escapeMarkdownCell(metodo.nombre)).append("\n");
+            md.append("| Field | Value |\n");
+            md.append("| --- | --- |\n");
+            md.append("| Signature | ").append(escapeMarkdownCell(metodo.firma)).append(" |\n");
+            md.append("| Parameters | ").append(escapeMarkdownCell(metodo.parametros)).append(" |\n");
+            md.append("| Returns | ").append(escapeMarkdownCell(metodo.retorno)).append(" |\n");
+            md.append("| Description | ").append(escapeMarkdownCell(metodo.descripcion)).append(" |\n");
+            md.append("| Modifiers | ").append(escapeMarkdownCell(metodo.modificadores)).append(" |\n");
+            md.append("| Getter | ").append(metodo.esGetter).append(" |\n");
+            md.append("| Setter | ").append(metodo.esSetter).append(" |\n");
+            md.append("| Constructor | ").append(metodo.esConstructor).append(" |\n");
+            md.append("| Overridden | ").append(metodo.esSobreescrito).append(" |\n");
+            md.append("| Decorators | ").append(escapeMarkdownCell(metodo.decoradores)).append(" |\n");
+            md.append("| Defined in | ").append(escapeMarkdownCell(metodo.definicion)).append(" |\n\n");
         }
 
         try (FileWriter writer = new FileWriter(nombreArchivo)) {
@@ -117,70 +144,66 @@ public class MarkdownGenerator {
         }
     }
 
-    private static List<PropiedadDoc> extraerPropiedades(Class<?> clase, List<String> lineasFuente) {
+    private static List<PropiedadDoc> extraerPropiedades(Class<?> clase, List<String> lineasFuente, String rutaFuente) {
         List<PropiedadDoc> propiedades = new ArrayList<>();
         for (Field field : clase.getDeclaredFields()) {
             InfoAtributo info = field.getAnnotation(InfoAtributo.class);
-            if (info == null) {
-                continue;
-            }
             int linea = buscarLineaCampo(lineasFuente, field.getName());
+            String descripcion = (info != null && !info.descripcion().isBlank()) ? info.descripcion() : "Sin descripcion";
             propiedades.add(new PropiedadDoc(
                 field.getName(),
-                info.tipo(),
-                info.descripcion(),
-                String.join(", ", info.modificadores()),
+                nombreTipo(field.getType()),
+                descripcion,
+                textoModificadores(field.getModifiers()),
                 construirDecoradores(field.getAnnotations()),
-                linea > 0 ? linea : 0
+                construirDefinicion(rutaFuente, linea)
             ));
         }
         propiedades.sort(Comparator.comparing(p -> p.nombre));
         return propiedades;
     }
 
-    private static List<MetodoDoc> extraerMetodos(Class<?> clase, List<String> lineasFuente) {
+    private static List<MetodoDoc> extraerMetodos(Class<?> clase, List<String> lineasFuente, String rutaFuente) {
         List<MetodoDoc> metodos = new ArrayList<>();
-
-        for (Method method : clase.getDeclaredMethods()) {
-            InfoMetodo info = method.getAnnotation(InfoMetodo.class);
-            if (info == null) {
-                continue;
-            }
-            int linea = buscarLineaMetodo(lineasFuente, method.getName());
-            metodos.add(new MetodoDoc(
-                method.getName(),
-                String.join(", ", info.parametros()),
-                info.tipoRetorno(),
-                info.descripcion(),
-                String.join(", ", info.modificadores()),
-                construirDecoradores(method.getAnnotations()),
-                info.esGetter(),
-                info.esSetter(),
-                info.esConstructor(),
-                info.esSobreescrito(),
-                linea > 0 ? linea : 0
-            ));
-        }
 
         for (Constructor<?> constructor : clase.getDeclaredConstructors()) {
             InfoMetodo info = constructor.getAnnotation(InfoMetodo.class);
-            if (info == null) {
-                continue;
-            }
-            int linea = buscarLineaMetodo(lineasFuente, constructor.getName());
-            String retorno = info.tipoRetorno().isBlank() ? "void" : info.tipoRetorno();
+            String nombre = clase.getSimpleName();
+            String parametros = firmaParametros(constructor);
+            int linea = buscarLineaMetodo(lineasFuente, nombre);
             metodos.add(new MetodoDoc(
-                constructor.getName(),
-                String.join(", ", info.parametros()),
-                retorno,
-                info.descripcion(),
-                String.join(", ", info.modificadores()),
+                nombre,
+                firmaMetodo(nombre, parametros),
+                parametros,
+                "void",
+                (info != null && !info.descripcion().isBlank()) ? info.descripcion() : "Sin descripcion",
+                textoModificadores(constructor.getModifiers()),
                 construirDecoradores(constructor.getAnnotations()),
-                info.esGetter(),
-                info.esSetter(),
-                info.esConstructor(),
-                info.esSobreescrito(),
-                linea > 0 ? linea : 0
+                false,
+                false,
+                true,
+                false,
+                construirDefinicion(rutaFuente, linea)
+            ));
+        }
+
+        for (Method method : clase.getDeclaredMethods()) {
+            InfoMetodo info = method.getAnnotation(InfoMetodo.class);
+            String parametros = firmaParametros(method);
+            int linea = buscarLineaMetodo(lineasFuente, method.getName());
+            metodos.add(new MetodoDoc(
+                method.getName(),
+                firmaMetodo(method.getName(), parametros),
+                parametros,
+                nombreTipo(method.getReturnType()),
+                (info != null && !info.descripcion().isBlank()) ? info.descripcion() : "Sin descripcion",
+                textoModificadores(method.getModifiers()),
+                construirDecoradores(method.getAnnotations()),
+                esGetter(method),
+                esSetter(method),
+                false,
+                esSobreescrito(clase, method),
+                construirDefinicion(rutaFuente, linea)
             ));
         }
 
@@ -189,17 +212,104 @@ public class MarkdownGenerator {
     }
 
     private static String construirDecoradores(Annotation[] annotations) {
-        StringBuilder sb = new StringBuilder();
+        List<String> decoradores = new ArrayList<>();
         for (Annotation annotation : annotations) {
-            sb.append("@").append(annotation.annotationType().getSimpleName());
-            sb.append(annotation.toString().replace("@" + annotation.annotationType().getName(), ""));
-            sb.append("\n");
+            decoradores.add(annotation.toString().replace("@" + annotation.annotationType().getName(), "@" + annotation.annotationType().getSimpleName()));
         }
-        return sb.toString().trim();
+        return decoradores.isEmpty() ? "-" : String.join("<br>", decoradores);
     }
 
-    private static String toTableMultiline(String value) {
-        return value.replace("\n", "<br>");
+    private static String textoModificadores(int modificadores) {
+        String texto = Modifier.toString(modificadores);
+        return texto.isBlank() ? "package-private" : texto;
+    }
+
+    private static String firmaParametros(Executable executable) {
+        Parameter[] parameters = executable.getParameters();
+        if (parameters.length == 0) {
+            return "-";
+        }
+
+        List<String> partes = new ArrayList<>();
+        for (Parameter parameter : parameters) {
+            partes.add(nombreTipo(parameter.getType()) + " " + parameter.getName());
+        }
+        return String.join(", ", partes);
+    }
+
+    private static String firmaMetodo(String nombre, String parametros) {
+        if ("-".equals(parametros)) {
+            return nombre + "()";
+        }
+        return nombre + "(" + parametros + ")";
+    }
+
+    private static String nombreTipo(Class<?> tipo) {
+        if (tipo.isArray()) {
+            return nombreTipo(tipo.getComponentType()) + "[]";
+        }
+        return tipo.getSimpleName();
+    }
+
+    private static boolean esSubclase(Class<?> clase) {
+        Class<?> superClase = clase.getSuperclass();
+        return superClase != null && !Object.class.equals(superClase);
+    }
+
+    private static boolean esGetter(Method method) {
+        if (method.getParameterCount() != 0 || void.class.equals(method.getReturnType())) {
+            return false;
+        }
+        String nombre = method.getName();
+        return nombre.startsWith("get") || nombre.startsWith("is");
+    }
+
+    private static boolean esSetter(Method method) {
+        return method.getName().startsWith("set")
+            && method.getParameterCount() == 1
+            && void.class.equals(method.getReturnType());
+    }
+
+    private static boolean esSobreescrito(Class<?> clase, Method method) {
+        if (method.isAnnotationPresent(Override.class)) {
+            return true;
+        }
+
+        Class<?> superClase = clase.getSuperclass();
+        while (superClase != null) {
+            try {
+                superClase.getDeclaredMethod(method.getName(), method.getParameterTypes());
+                return true;
+            } catch (NoSuchMethodException ignored) {
+                superClase = superClase.getSuperclass();
+            }
+        }
+
+        for (Class<?> iface : clase.getInterfaces()) {
+            try {
+                iface.getMethod(method.getName(), method.getParameterTypes());
+                return true;
+            } catch (NoSuchMethodException ignored) {
+                // No hay coincidencia en esta interfaz.
+            }
+        }
+        return false;
+    }
+
+    private static String valorClase(InfoClase infoClase, String fallback, CampoClase campo) {
+        if (infoClase == null) {
+            return fallback;
+        }
+        return switch (campo) {
+            case NOMBRE -> infoClase.nombre();
+            case AUTOR -> infoClase.autor();
+            case DESCRIPCION -> infoClase.descripcion();
+            case VERSION -> infoClase.version();
+        };
+    }
+
+    private static String construirDefinicion(String rutaFuente, int linea) {
+        return linea > 0 ? rutaFuente + ":" + linea : rutaFuente;
     }
 
     private static String escapeMarkdownCell(String value) {
@@ -229,17 +339,25 @@ public class MarkdownGenerator {
         return -1;
     }
 
+    private enum CampoClase {
+        NOMBRE,
+        AUTOR,
+        DESCRIPCION,
+        VERSION
+    }
+
     private record PropiedadDoc(
         String nombre,
         String tipo,
         String descripcion,
         String modificadores,
         String decoradores,
-        int lineaDefinicion
+        String definicion
     ) {}
 
     private record MetodoDoc(
         String nombre,
+        String firma,
         String parametros,
         String retorno,
         String descripcion,
@@ -249,6 +367,6 @@ public class MarkdownGenerator {
         boolean esSetter,
         boolean esConstructor,
         boolean esSobreescrito,
-        int lineaDefinicion
+        String definicion
     ) {}
 }

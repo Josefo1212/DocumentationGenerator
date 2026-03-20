@@ -6,7 +6,5 @@ import java.lang.annotation.ElementType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface InfoAtributo {
-	String tipo();
-	String descripcion();
-	String[] modificadores() default {};
+	String descripcion() default "";
 }

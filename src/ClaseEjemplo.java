@@ -2,76 +2,37 @@
 	nombre = "ClaseEjemplo",
 	autor = "Jose Fereira",
 	descripcion = "Profe pongame 20 porfa:).",
-	version = "1.0",
-	esSubclase = false
+	version = "1.0"
 )
 public class ClaseEjemplo {
-	@InfoAtributo(
-		tipo = "String",
-		descripcion = "Nombre del usuario",
-		modificadores = {"private"}
-	)
+	@InfoAtributo(descripcion = "Nombre del usuario")
 	private String nombre;
 
-	@InfoAtributo(
-		tipo = "int",
-		descripcion = "Edad del usuario",
-		modificadores = {"private"}
-	)
+	@InfoAtributo(descripcion = "Edad del usuario")
 	private int edad;
 
-	@InfoMetodo(
-		parametros = {"String nombre", "int edad"},
-		tipoRetorno = "",
-		descripcion = "Constructor de la clase.",
-		modificadores = {"public"},
-		esConstructor = true
-	)
+	@InfoMetodo(descripcion = "Constructor de la clase.")
 	public ClaseEjemplo(String nombre, int edad) {
 		this.nombre = nombre;
 		this.edad = edad;
 	}
 
-	@InfoMetodo(
-		parametros = {},
-		tipoRetorno = "String",
-		descripcion = "Obtiene el nombre.",
-		modificadores = {"public"},
-		esGetter = true
-	)
+	@InfoMetodo(descripcion = "Obtiene el nombre.")
 	public String getNombre() {
 		return nombre;
 	}
 
-	@InfoMetodo(
-		parametros = {"String nombre"},
-		tipoRetorno = "void",
-		descripcion = "Establece el nombre.",
-		modificadores = {"public"},
-		esSetter = true
-	)
+	@InfoMetodo(descripcion = "Establece el nombre.")
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
 
-	@InfoMetodo(
-		parametros = {},
-		tipoRetorno = "int",
-		descripcion = "Obtiene la edad.",
-		modificadores = {"public"},
-		esGetter = true
-	)
+	@InfoMetodo(descripcion = "Obtiene la edad.")
 	public int getEdad() {
 		return edad;
 	}
 
-	@InfoMetodo(
-		parametros = {"int edad"},
-		tipoRetorno = "void",
-		descripcion = "Establece la edad.",
-		modificadores = {"public"},
-		esSetter = true
-	)
+	@InfoMetodo(descripcion = "Establece la edad.")
 	public void setEdad(int edad) {
 		this.edad = edad;
 	}
